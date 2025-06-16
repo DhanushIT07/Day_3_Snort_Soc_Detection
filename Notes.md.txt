@@ -1,0 +1,146 @@
+
+## 🔒 SOC LAB REPORT – Intrusion Detection Using Snort IDS
+Name: Dhanush A
+Lab Type: Cybersecurity SOC Virtual Lab
+Tools Used: Snort, Wireshark, pfSense, Hydra, Nmap, Hping3, Apache2
+
+---
+
+🧱 LAB OVERVIEW
+
+This lab simulates a basic Security Operations Center (SOC) environment using:
+
+pfSense: Firewall & IDS deployment
+Ubuntu Server : Target machine (Apache HTTP server installed)
+Kali Linux : Attacker machine (used for reconnaissance and attacks)
+Snort : Intrusion Detection System (deployed on pfSense or standalone in Ubuntu)
+
+---
+
+ 🔍 OBJECTIVE
+
+* To simulate real-world attacks in a lab environment.
+* To write and test custom Snort rules for detecting:
+
+  * ICMP Ping
+  * TCP SYN Scan
+  * SSH Brute-force
+  * HTTP GET requests
+
+---
+
+ 🔧 LAB SETUP
+
+| Component              | Details                                  |
+| ---------------------- | ---------------------------------------- |
+| **Kali Linux**         | Used for launching attacks (Hydra, Nmap) |
+| **Ubuntu Server**      | Hosts Apache HTTP server (port 80)       |
+| **Snort IDS**          | Monitors eth0 interface for packet logs  |
+| **pfSense (optional)** | Used as gateway firewall/router          |
+
+---
+
+ 📐 NETWORK DIAGRAM
+
+```
+[ Kali Linux (Attacker) ] ---> [ Ubuntu Server (Target with Snort) ]
+```
+
+---
+
+🧪 EXPERIMENTS & RESULTS
+1️⃣ ICMP Ping Detection
+
+Attack:
+
+```bash
+ping <ubuntu-server-ip>
+```
+
+Snort Rule:
+
+```snort
+alert icmp any any -> any any (msg:"ICMP Ping Detected"; sid:1000001; rev:1;)
+```
+
+Result: Snort successfully captured ICMP echo requests.
+
+---
+
+2️⃣ TCP SYN Scan Detection
+
+Attack:
+
+```bash
+sudo nmap -sS <ubuntu-server-ip>
+```
+
+or
+
+```bash
+sudo hping3 -S -p 80 -c 1 <ubuntu-server-ip>
+```
+
+Snort Rule:
+
+```snort
+alert tcp any any -> any any (flags:S; msg:"TCP SYN Scan Detected"; sid:1000002; rev:1;)
+```
+
+**Result**: Detected port scanning using SYN flag.
+
+---
+
+3️⃣ SSH Brute Force Detection
+
+Attack:
+
+```bash
+hydra -l root -P /usr/share/wordlists/rockyou.txt ssh://<ubuntu-server-ip>
+```
+
+Snort Rule:
+
+```snort
+alert tcp any any -> any 22 (msg:"Possible SSH Brute-force"; flow:to_server,established; detection_filter:track by_src, count 5, seconds 60; sid:1000003; rev:1;)
+```
+
+Result: Triggered alert on repeated login attempts to SSH.
+
+---
+
+4️⃣ HTTP GET Request Detection
+
+Attack:
+Open web browser in Kali and navigate to:
+
+```
+http://<ubuntu-server-ip>
+```
+
+Snort Rule:
+
+```snort
+alert tcp any any -> any 80 (msg:"HTTP GET Request Detected"; content:"GET"; http_method; sid:1000004; rev:1;)
+```
+
+Result: Detected HTTP GET request to the Apache server.
+
+---
+
+## 🧠 SKILLS GAINED
+
+* Writing Snort IDS rules
+* Network traffic analysis using Wireshark and tcpdump
+* Using Nmap, Hydra, and Hping3 for offensive security
+* Understanding TCP/IP layers and packet structure
+* Detecting common cyberattack patterns
+
+---
+
+## ✅ CONCLUSION
+
+The lab successfully simulated basic real-world cyberattacks and demonstrated how a signature-based IDS like Snort can detect and alert based on well-defined rules.
+
+This foundation is essential for careers in SOC operations, network defense, and cybersecurity analysis.
+
